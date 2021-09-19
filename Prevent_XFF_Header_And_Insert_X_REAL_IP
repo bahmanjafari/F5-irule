@@ -1,0 +1,5 @@
+when HTTP_REQUEST {
+HTTP::header remove X-Forwarded-For
+HTTP::header insert X-Forwarded-For [IP::remote_addr]
+HTTP::header insert X-Real-IP [IP::remote_addr]
+}
