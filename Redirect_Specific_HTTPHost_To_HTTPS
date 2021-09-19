@@ -1,0 +1,9 @@
+#By doing it this way we can use whats called an "iRule Data Group List" to contain all the domains we want to redirect.
+#Each time we want to add a domain we don't need to touch the iRule itself, only add the domain to the data group list.
+# For example create "FundRedirectToHTTPS"
+
+when HTTP_REQUEST {
+ if { ([class match [string tolower [HTTP::host]] equals "FundRedirectToHTTPS"] ) } {
+  HTTP::redirect "https://[HTTP::host][HTTP::uri]"
+  }
+ }
