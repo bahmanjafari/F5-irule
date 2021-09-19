@@ -1,0 +1,11 @@
+when HTTP_REQUEST {
+   if { [HTTP::host] starts_with "X.com" }{
+      if { [class match [IP::client_addr] equals "Shared Objects"] } { 
+         pool A
+      } else {
+         reject
+      } 
+   } else {
+      pool B
+   } 
+}
