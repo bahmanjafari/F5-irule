@@ -1,0 +1,47 @@
+proc cretaeGuid {
+    append s [clock seconds] [IP::local_addr] [IP::client_addr] [expr { int(100000000 * rand()) }] [clock clicks]
+    set s [md5 $s]
+    binary scan $s c* s
+    lset s 8 [expr {([lindex $s 8] & 0x7F) | 0x40}]
+    lset s 6 [expr {([lindex $s 6] & 0x0F) | 0x40}]
+    set s [binary format c* $s]
+    binary scan $s H* s
+    append u [substr $s 0 8] "-" [substr $s 8 4] "-" [substr $s 12 4] "-" [substr $s 16 4] "-" [substr $s 20 12]
+    unset s
+    return $u
+}
+
+when CLIENT_ACCEPTED {
+    set uid [call  cretaeGuid ]
+}
+
+when HTTP_REQUEST_DATA {
+  set HTTP_payload [string tolower [HTTP::payload]]
+  if { $HTTP_payload contains "password=" } {
+    regsub -- "(.*password=).*?(&.*)" $HTTP_payload "\\1XXXXXXXX\\2"  HTTP_payload_redacted
+    set HTTP_payload $HTTP_payload_redacted
+  }
+  set hsl [HSL::open -proto UDP -pool "pool_name"]
+  HSL::send $hsl "<190>,f5_irule=Splunk-iRule-HTTP-Post-Body,{\"_TIMESTAMP\":\"[clock clicks -milliseconds]\",$log_http_ref1,$log_f5_info1,$HTTP_payload\r\n}"
+}
+
+when HTTP_REQUEST {
+  if { [HTTP::method] eq "POST" }{
+    set cl [HTTP::header "Content-Length"]
+    HTTP::collect $cl
+  }
+ 
+  set log_http_ref1 "uid=$uid,HTTP_method=[HTTP::method],HTTP_host=[HTTP::host],TCP_local_port=[TCP::local_port],IP_client_addr=[IP::client_addr],HTTP_uri=[HTTP::uri]\r\n"
+  set log_http_req1 "IP_client_addr=[IP::client_addr],HTTP_request=[HTTP::request]\r\n"
+  set log_ssl_info1 "SSL_cipher_name=[SSL::cipher name],SSL_cipher_version=[SSL::cipher version],SSL_cipher_bits=[SSL::cipher bits],SSL_secure_renegotiation=[SSL::secure_renegotiation]\r\n"
+  set log_f5_info1 "virtual_name=[virtual name],LB_server_addr=[LB::server addr]\r\n"
+  set hsl [HSL::open -proto UDP -pool "pool_name"]
+  HSL::send $hsl "<190>,f5_irule=Splunk-iRule-HTTP-Req,{\"_TIMESTAMP\":\"[clock clicks -milliseconds]\",$log_http_ref1,$log_ssl_info1,$log_f5_info1,$log_http_req1}"
+
+}
+
+when HTTP_RESPONSE {
+  set selectedpoolMemberIp  [LB::server]
+  set hsl [HSL::open -proto UDP -pool "pool_name"]
+  HSL::send $hsl "<190>,f5_irule=Splunk-iRule-HTTP-Res,{\"_TIMESTAMP\":\"[clock clicks -milliseconds]\",$log_http_ref1,http_status=[HTTP::status],\"selectedpoolMember\":\"[LB::server]\"}"
+}
