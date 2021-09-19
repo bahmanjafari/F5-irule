@@ -12,5 +12,5 @@ Remove X-Forwarded-For to prevent XFF spoofing and Add XFF and X_Real_IP based o
 select pool based on source IP address and limit access
 
 #### Redirect_Specific_HTTPHost_To_HTTPS
-By doing it this way we can use whats called an "iRule Data Group List" to contain all the domains we want to redirect.
-Each time we want to add a domain we don't need to touch the iRule itself, only add the domain to the data group list.
+By doing it this way we can use whats called an "iRule Data Group List" to contain all the domains we want to redirect.<br />
+Each time we want to add a domain we don't need to touch the iRule itself, only add the domain to the data group list.<br />
