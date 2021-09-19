@@ -1,3 +1,5 @@
+# many thanks  Sebastian Maniak @sebbycorp
+
 proc cretaeGuid {
     append s [clock seconds] [IP::local_addr] [IP::client_addr] [expr { int(100000000 * rand()) }] [clock clicks]
     set s [md5 $s]
