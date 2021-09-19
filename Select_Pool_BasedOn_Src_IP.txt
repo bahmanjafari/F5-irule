@@ -1,6 +1,6 @@
 when HTTP_REQUEST {
    if { [HTTP::host] starts_with "X.com" }{
-      if { [class match [IP::client_addr] equals "Shared Objects"] } { 
+      if { [class match [IP::client_addr] equals "iRules : Data Group List"] } { 
          pool A
       } else {
          reject
