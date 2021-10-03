@@ -45,5 +45,5 @@ when HTTP_REQUEST {
 when HTTP_RESPONSE {
   set selectedpoolMemberIp  [LB::server]
   set hsl [HSL::open -proto UDP -pool "pool_name"]
-  HSL::send $hsl "<190>,f5_irule=Splunk-iRule-HTTP-Res,{\"_TIMESTAMP\":\"[clock clicks -milliseconds]\",$log_http_ref1,http_status=[HTTP::status],\"selectedpoolMember\":\"[LB::server]\"}"
+  HSL::send $hsl "<190>,f5_irule=Splunk-iRule-HTTP-Res,{\"_TIMESTAMP\":\"[clock clicks -milliseconds]\",$log_http_ref1,http_status=[HTTP::status],selectedpoolMember=[LB::server]}"
 }
